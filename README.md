@@ -226,3 +226,5 @@ Follow this 2-minute walkthrough to showcase the platform's closed-loop capabili
 ---
 
 **Developed for AICTE Smart India Hackathon 2026 &bull; Theme: Smart Automation**
+#   s m a r t - r e s o u r c e - i n t e l l i g e n c e - p l a t f o r m  
+ 
