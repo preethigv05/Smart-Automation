@@ -229,4 +229,5 @@ Follow this 2-minute walkthrough to showcase the platform's closed-loop capabili
 #   s m a r t - r e s o u r c e - i n t e l l i g e n c e - p l a t f o r m  
  #   s m a r t - r e s o u r c e - i n t e l l i g e n c e - p l a t f o r m  
  #   S m a r t - A u t o m a t i o n  
+ #   S m a r t - A u t o m a t i o n  
  
