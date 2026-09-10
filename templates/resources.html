@@ -1,0 +1,173 @@
+{% extends "base.html" %}
+
+{% block page_title %}Resource Management{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h4 class="fw-bold mb-1">Campus Resource Registry</h4>
+    <p class="text-muted small mb-0">Monitor, configure, and manage energy, water, compute, space, and networking assets.</p>
+  </div>
+  <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#resourceModal" onclick="openAddResourceModal()">
+    <i class="bi bi-plus-lg me-1"></i> Add New Resource
+  </button>
+</div>
+
+<!-- FILTER & SEARCH BAR -->
+<div class="card-modern mb-4">
+  <div class="card-modern-body py-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-5">
+        <div class="input-group">
+          <span class="input-group-text bg-white border-end-0"><i class="bi bi-search text-muted"></i></span>
+          <input type="text" class="form-control border-start-0 ps-0" id="resource-search" placeholder="Search resource by name or location...">
+        </div>
+      </div>
+      <div class="col-md-3">
+        <select class="form-select" id="filter-type">
+          <option value="">All Resource Types</option>
+          <option value="electricity">Electricity / Power</option>
+          <option value="water">Water / HVAC Supply</option>
+          <option value="computing">Computing & Labs</option>
+          <option value="room">Classroom & Spaces</option>
+          <option value="network">Network Bandwidth</option>
+        </select>
+      </div>
+      <div class="col-md-2">
+        <select class="form-select" id="filter-status">
+          <option value="">All Statuses</option>
+          <option value="Optimal">Optimal</option>
+          <option value="Warning">Warning</option>
+          <option value="Critical">Critical</option>
+          <option value="Inactive">Inactive</option>
+        </select>
+      </div>
+      <div class="col-md-2 text-end">
+        <span class="small text-muted" id="resource-count-label">Loading assets...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RESOURCES TABLE CARD -->
+<div class="card-modern">
+  <div class="card-modern-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern" id="resourcesTable">
+        <thead>
+          <tr>
+            <th>Resource Asset</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Current Telemetry</th>
+            <th>Utilization</th>
+            <th>Health Status</th>
+            <th class="text-end">Actions</th>
+          </tr>
+        </thead>
+        <tbody id="resources-table-body">
+          <tr>
+            <td colspan="7" class="text-center py-5">
+              <div class="spinner-border text-primary" role="status"></div>
+              <p class="text-muted mt-2 mb-0">Loading resource registry...</p>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- ADD / EDIT RESOURCE MODAL -->
+<div class="modal fade" id="resourceModal" tabindex="-1" aria-labelledby="resourceModalTitle" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header">
+        <h5 class="modal-title fw-bold" id="resourceModalTitle">Add New Resource</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <form id="resourceForm">
+        <input type="hidden" id="res-id">
+        <div class="modal-body p-4">
+          <div class="mb-3">
+            <label for="res-name" class="form-label small fw-semibold">Resource Name *</label>
+            <input type="text" class="form-control" id="res-name" required placeholder="e.g., Computer Lab B Workstations">
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="res-type" class="form-label small fw-semibold">Resource Type *</label>
+              <select class="form-select" id="res-type" required>
+                <option value="electricity">Electricity / Power</option>
+                <option value="water">Water / Supply</option>
+                <option value="computing">Computing Workstations</option>
+                <option value="room">Classroom / Hall</option>
+                <option value="network">Network Bandwidth</option>
+              </select>
+            </div>
+            <div class="col-md-6">
+              <label for="res-unit" class="form-label small fw-semibold">Measurement Unit *</label>
+              <input type="text" class="form-control" id="res-unit" required placeholder="e.g., kWh, L/min, Mbps, Units">
+            </div>
+          </div>
+
+          <div class="row g-3 mb-3">
+            <div class="col-md-6">
+              <label for="res-capacity" class="form-label small fw-semibold">Total Capacity *</label>
+              <input type="number" step="0.1" class="form-control" id="res-capacity" required placeholder="e.g., 500">
+            </div>
+            <div class="col-md-6">
+              <label for="res-usage" class="form-label small fw-semibold">Current Usage</label>
+              <input type="number" step="0.1" class="form-control" id="res-usage" placeholder="e.g., 180">
+            </div>
+          </div>
+
+          <div class="row g-3">
+            <div class="col-md-6">
+              <label for="res-location" class="form-label small fw-semibold">Location / Substation</label>
+              <input type="text" class="form-control" id="res-location" placeholder="e.g., Block B - 2nd Floor">
+            </div>
+            <div class="col-md-6">
+              <label for="res-status" class="form-label small fw-semibold">Operational Status</label>
+              <select class="form-select" id="res-status">
+                <option value="Optimal">Optimal</option>
+                <option value="Warning">Warning</option>
+                <option value="Critical">Critical</option>
+                <option value="Inactive">Inactive</option>
+              </select>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer bg-light">
+          <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Cancel</button>
+          <button type="submit" class="btn btn-primary btn-sm" id="btn-save-resource">Save Resource</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
+
+<!-- VIEW RESOURCE DETAILS MODAL -->
+<div class="modal fade" id="viewResourceModal" tabindex="-1" aria-hidden="true">
+  <div class="modal-dialog modal-dialog-centered modal-lg">
+    <div class="modal-content border-0 shadow">
+      <div class="modal-header bg-light">
+        <h5 class="modal-title fw-bold" id="view-res-name">Resource Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body p-4" id="view-res-content">
+        <div class="text-center py-4">
+          <div class="spinner-border text-primary" role="status"></div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary btn-sm" data-bs-dismiss="modal">Close</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/resources.js') }}"></script>
+{% endblock %}

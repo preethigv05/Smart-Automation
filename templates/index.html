@@ -1,0 +1,1208 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Smart Resource Intelligence & Automation Platform | Enterprise AI Suite</title>
+
+  <!-- Google Fonts: Inter & JetBrains Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+
+  <!-- Font Awesome 6 CDN for Professional Enterprise Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+  <!-- Custom Modern SaaS Stylesheet -->
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+</head>
+<body>
+
+  <!-- Mobile Sidebar Backdrop -->
+  <div class="sidebar-backdrop" id="sidebarBackdrop"></div>
+
+  <div class="app-container">
+
+    <!-- ====================================================================
+         1. LEFT SIDEBAR (Fixed 260px / Collapsible on Mobile)
+         ==================================================================== -->
+    <aside class="sidebar" id="appSidebar">
+      <!-- Sidebar Brand -->
+      <div class="sidebar-header">
+        <div class="logo-badge">SRI</div>
+        <div class="logo-text">
+          <span class="brand-title">Smart Resource Intelligence</span>
+          <span class="brand-subtitle">Autonomous AI Ops</span>
+        </div>
+      </div>
+
+      <!-- Navigation Links -->
+      <nav class="sidebar-nav">
+        <span class="nav-section-label">Core Navigation</span>
+        <a href="#dashboard-hero" class="nav-link active">
+          <i class="fa-solid fa-gauge-high"></i>
+          <span>Dashboard</span>
+        </a>
+        <a href="#resource-health" class="nav-link">
+          <i class="fa-solid fa-server"></i>
+          <span>Resource Monitoring</span>
+        </a>
+        <a href="#ai-insights" class="nav-link">
+          <i class="fa-solid fa-brain"></i>
+          <span>AI Insights</span>
+        </a>
+        <a href="#automation-center" class="nav-link">
+          <i class="fa-solid fa-robot"></i>
+          <span>Automation Center</span>
+        </a>
+        <a href="#predictive-analytics" class="nav-link">
+          <i class="fa-solid fa-chart-line"></i>
+          <span>Predictive Analytics</span>
+        </a>
+        <a href="#alert-center" class="nav-link">
+          <i class="fa-solid fa-bell"></i>
+          <span>Alerts</span>
+          <span class="nav-badge" id="alertCountBadge">3</span>
+        </a>
+        <a href="#recommendations-section" class="nav-link">
+          <i class="fa-solid fa-lightbulb"></i>
+          <span>Recommendations</span>
+        </a>
+        <a href="#reports-section" class="nav-link">
+          <i class="fa-solid fa-file-waveform"></i>
+          <span>Reports</span>
+        </a>
+        <a href="#data-sources-section" class="nav-link">
+          <i class="fa-solid fa-network-wired"></i>
+          <span>Data Sources</span>
+        </a>
+
+        <span class="nav-section-label" style="margin-top: 12px;">System Control</span>
+        <a href="javascript:void(0)" class="nav-link" id="openMlTesterBtn">
+          <i class="fa-solid fa-microchip"></i>
+          <span>ML Model Tester</span>
+        </a>
+        <a href="#app-footer" class="nav-link">
+          <i class="fa-solid fa-gear"></i>
+          <span>Settings</span>
+        </a>
+      </nav>
+
+      <!-- Sidebar Footer Status -->
+      <div class="sidebar-footer">
+        <div class="system-status-pill">
+          <span class="status-label">AI Engine</span>
+          <span class="status-indicator online">
+            <span class="status-dot pulse"></span>
+            Online
+          </span>
+        </div>
+        <div class="system-status-pill">
+          <span class="status-label">System Status</span>
+          <span class="status-indicator online">
+            <span class="status-dot"></span>
+            Healthy
+          </span>
+        </div>
+      </div>
+    </aside>
+
+
+    <!-- ====================================================================
+         MAIN CONTENT WRAPPER
+         ==================================================================== -->
+    <div class="main-wrapper">
+
+      <!-- ==================================================================
+           2. TOP NAVBAR
+           ================================================================== -->
+      <header class="navbar">
+        <div class="navbar-left">
+          <button class="sidebar-toggle-btn" id="sidebarToggleBtn" aria-label="Toggle Navigation">
+            <i class="fa-solid fa-bars"></i>
+          </button>
+          <div class="navbar-titles">
+            <span class="navbar-title">Smart Resource Intelligence</span>
+            <span class="navbar-subtitle">
+              <span class="navbar-subtitle-tag">SIH 2026</span> • AI-Powered Resource Optimization & Automation
+            </span>
+          </div>
+        </div>
+
+        <div class="navbar-right">
+          <div class="nav-status-badge">
+            <span class="status-dot pulse"></span>
+            <span>Live System Status: Optimal</span>
+          </div>
+
+          <div class="nav-status-badge" style="background: rgba(56, 189, 248, 0.08); border-color: rgba(56, 189, 248, 0.25); color: var(--cyan-primary);">
+            <i class="fa-solid fa-bolt" style="font-size: 0.75rem;"></i>
+            <span>AI Engine Online</span>
+          </div>
+
+          <!-- Quick Judge Demo Trigger -->
+          <button class="btn-ai-indigo" id="triggerDemoPipelineBtn" style="padding: 6px 14px; font-size: 0.8rem;">
+            <i class="fa-solid fa-wand-magic-sparkles"></i>
+            <span>Judge Demo</span>
+          </button>
+
+          <!-- Notification Bell -->
+          <div class="nav-icon-btn" id="navNotificationBtn" title="3 Active Alerts">
+            <i class="fa-solid fa-bell"></i>
+            <span class="notification-count">3</span>
+          </div>
+
+          <!-- User/Admin Profile -->
+          <div class="admin-profile" title="Signed in as Lead System Administrator">
+            <div class="avatar">A</div>
+            <div class="admin-info">
+              <span class="admin-name">Admin</span>
+              <span class="admin-role">System Admin</span>
+            </div>
+          </div>
+        </div>
+      </header>
+
+
+      <!-- ==================================================================
+           MAIN BODY CONTENT
+           ================================================================== -->
+      <main class="content-body">
+
+        <!-- ================================================================
+             3. HERO / WELCOME SECTION
+             ================================================================ -->
+        <section class="glass-card hero-banner" id="dashboard-hero">
+          <div class="hero-content-row">
+            <div class="hero-left">
+              <div class="hero-badge-pill">
+                <span class="radar-dot"></span>
+                <span>AI ANALYSIS ACTIVE</span>
+              </div>
+              <h1 class="hero-heading" id="dynamicGreeting">Good Morning, Admin</h1>
+              <p class="hero-desc">
+                Monitor resources, detect anomalies and automate optimization using AI. Continuous multi-source telemetry telemetry ingestion is live.
+              </p>
+            </div>
+
+            <div class="hero-actions">
+              <button class="btn-ai-outline" id="openAddResourceModalBtn">
+                <i class="fa-solid fa-plus"></i>
+                <span>Add Resource</span>
+              </button>
+              <button class="btn-ai-primary" id="runAnalysisBtn">
+                <i class="fa-solid fa-brain"></i>
+                <span>Run AI Analysis</span>
+              </button>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             4. KPI CARDS (4 PREMIUM CARDS)
+             ================================================================ -->
+        <section class="kpi-grid" id="kpi-cards">
+          <!-- Card 1: TOTAL RESOURCES -->
+          <div class="glass-card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Total Resources</span>
+              <div class="kpi-icon-box kpi-icon-cyan">
+                <i class="fa-solid fa-cubes-stacked"></i>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="kpiTotalResources">128</div>
+              <div class="kpi-trend trend-up">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span>+12% from last month</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 2: RESOURCE EFFICIENCY -->
+          <div class="glass-card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Resource Efficiency</span>
+              <div class="kpi-icon-box kpi-icon-emerald">
+                <i class="fa-solid fa-gauge-high"></i>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="kpiResourceEfficiency">87%</div>
+              <div class="kpi-trend trend-up">
+                <i class="fa-solid fa-arrow-trend-up"></i>
+                <span>+5.4% improvement</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 3: ACTIVE ALERTS -->
+          <div class="glass-card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Active Alerts</span>
+              <div class="kpi-icon-box kpi-icon-rose">
+                <i class="fa-solid fa-triangle-exclamation"></i>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="kpiAlertVal">06</div>
+              <div class="kpi-trend trend-alert">
+                <i class="fa-solid fa-circle-exclamation"></i>
+                <span>2 critical</span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Card 4: AUTOMATION TASKS -->
+          <div class="glass-card kpi-card">
+            <div class="kpi-header">
+              <span class="kpi-label">Automation Tasks</span>
+              <div class="kpi-icon-box kpi-icon-indigo">
+                <i class="fa-solid fa-microchip"></i>
+              </div>
+            </div>
+            <div class="kpi-body">
+              <div class="kpi-value" id="kpiAutomationTasks">24</div>
+              <div class="kpi-trend trend-info">
+                <i class="fa-solid fa-circle-check"></i>
+                <span>18 completed today</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             5. RESOURCE HEALTH SECTION (4 RESOURCE CARDS)
+             ================================================================ -->
+        <section class="glass-card" id="resource-health">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-heart-pulse"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Resource Health Monitoring</h2>
+                <p class="section-subtitle">Real-time status across multi-domain campus utilities</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="resource-health-grid">
+            <!-- 1. Electricity -->
+            <div class="glass-card resource-card status-optimal">
+              <div class="resource-card-top">
+                <div class="resource-title-wrap">
+                  <div class="resource-type-icon" style="background: rgba(56, 189, 248, 0.12); color: var(--cyan-primary);">
+                    <i class="fa-solid fa-bolt"></i>
+                  </div>
+                  <span class="resource-name">Electricity</span>
+                </div>
+                <span class="badge-status optimal">Optimal</span>
+              </div>
+
+              <div class="resource-metrics">
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Usage</span>
+                    <strong>78%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-cyan" style="width: 78%;"></div>
+                  </div>
+                </div>
+
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Efficiency</span>
+                    <strong>91%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-emerald" style="width: 91%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 2. Water -->
+            <div class="glass-card resource-card status-high">
+              <div class="resource-card-top">
+                <div class="resource-title-wrap">
+                  <div class="resource-type-icon" style="background: rgba(245, 158, 11, 0.12); color: var(--amber-warning);">
+                    <i class="fa-solid fa-droplet"></i>
+                  </div>
+                  <span class="resource-name">Water</span>
+                </div>
+                <span class="badge-status high">High Usage</span>
+              </div>
+
+              <div class="resource-metrics">
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Usage</span>
+                    <strong>84%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-amber" style="width: 84%;"></div>
+                  </div>
+                </div>
+
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Efficiency</span>
+                    <strong>72%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-amber" style="width: 72%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 3. Network -->
+            <div class="glass-card resource-card status-optimal">
+              <div class="resource-card-top">
+                <div class="resource-title-wrap">
+                  <div class="resource-type-icon" style="background: rgba(99, 102, 241, 0.12); color: var(--indigo-accent);">
+                    <i class="fa-solid fa-network-wired"></i>
+                  </div>
+                  <span class="resource-name">Network</span>
+                </div>
+                <span class="badge-status optimal">Optimal</span>
+              </div>
+
+              <div class="resource-metrics">
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Usage</span>
+                    <strong>65%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-cyan" style="width: 65%;"></div>
+                  </div>
+                </div>
+
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Efficiency</span>
+                    <strong>89%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-emerald" style="width: 89%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            <!-- 4. Computing Power -->
+            <div class="glass-card resource-card status-overloaded">
+              <div class="resource-card-top">
+                <div class="resource-title-wrap">
+                  <div class="resource-type-icon" style="background: rgba(244, 63, 94, 0.12); color: var(--rose-danger);">
+                    <i class="fa-solid fa-microchip"></i>
+                  </div>
+                  <span class="resource-name">Computing Power</span>
+                </div>
+                <span class="badge-status overloaded">Overloaded</span>
+              </div>
+
+              <div class="resource-metrics">
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Usage</span>
+                    <strong>93%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-rose" style="width: 93%;"></div>
+                  </div>
+                </div>
+
+                <div class="metric-bar-group">
+                  <div class="metric-label-row">
+                    <span>Efficiency</span>
+                    <strong>61%</strong>
+                  </div>
+                  <div class="progress-track">
+                    <div class="progress-fill fill-rose" style="width: 61%;"></div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             6. RESOURCE CONSUMPTION ANALYTICS (LARGE CHART.JS)
+             ================================================================ -->
+        <section class="glass-card analytics-section" id="analytics-section">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-chart-area"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Resource Consumption Analytics</h2>
+                <p class="section-subtitle">Multi-stream telemetry trends across Electricity, Water, Network & Compute</p>
+              </div>
+            </div>
+
+            <div class="chart-header-actions">
+              <select class="timeframe-select" id="timeframeSelect" aria-label="Select Timeframe">
+                <option value="today" selected>Today</option>
+                <option value="week">This Week</option>
+                <option value="month">This Month</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Chart Canvas -->
+          <div class="chart-canvas-container">
+            <canvas id="consumptionChartCanvas"></canvas>
+          </div>
+
+          <!-- Stats Highlights -->
+          <div class="analytics-stat-row">
+            <div class="analytics-stat-box">
+              <span class="stat-box-title">Peak Usage</span>
+              <span class="stat-box-val" style="color: var(--rose-danger);">94.2 kW · 14:00 hrs</span>
+            </div>
+            <div class="analytics-stat-box">
+              <span class="stat-box-title">Average Usage</span>
+              <span class="stat-box-val" style="color: var(--cyan-primary);">68.5% capacity</span>
+            </div>
+            <div class="analytics-stat-box">
+              <span class="stat-box-title">Efficiency Trend</span>
+              <span class="stat-box-val" style="color: var(--emerald-success);">+7.8% this period</span>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             7. AI INSIGHT CENTER (3 CARDS)
+             ================================================================ -->
+        <section class="glass-card" id="ai-insights">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-brain"></i>
+              </div>
+              <div>
+                <h2 class="section-title">AI Insight Center</h2>
+                <p class="section-subtitle">Autonomous diagnostic signatures detected by statistical ML models</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="insights-grid">
+            <!-- 1. Energy Anomaly -->
+            <div class="glass-card insight-card" style="border-top: 3px solid var(--amber-warning);">
+              <div class="insight-card-top">
+                <div class="insight-type">
+                  <i class="fa-solid fa-bolt" style="color: var(--amber-warning);"></i>
+                  <span>ENERGY ANOMALY</span>
+                </div>
+                <span class="badge-status high">Medium</span>
+              </div>
+
+              <p class="insight-desc">
+                AI detected higher-than-normal electricity consumption during peak hours.
+              </p>
+
+              <div class="insight-rec-box">
+                <strong>Recommendation</strong>
+                Reduce unnecessary consumption during peak hours.
+              </div>
+
+              <div class="insight-actions">
+                <button class="btn-insight-analyze" data-insight="Electricity Grid">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> Analyze
+                </button>
+                <button class="btn-insight-action" data-insight="Electricity Grid">
+                  <i class="fa-solid fa-bolt-lightning"></i> Take Action
+                </button>
+              </div>
+            </div>
+
+            <!-- 2. Water Wastage -->
+            <div class="glass-card insight-card" style="border-top: 3px solid var(--rose-danger);">
+              <div class="insight-card-top">
+                <div class="insight-type">
+                  <i class="fa-solid fa-droplet" style="color: var(--rose-danger);"></i>
+                  <span>WATER WASTAGE</span>
+                </div>
+                <span class="badge-status critical">High</span>
+              </div>
+
+              <p class="insight-desc">
+                Water consumption increased by 18% compared with the previous period.
+              </p>
+
+              <div class="insight-rec-box">
+                <strong>Recommendation</strong>
+                Inspect abnormal usage and optimize consumption.
+              </div>
+
+              <div class="insight-actions">
+                <button class="btn-insight-analyze" data-insight="Main Water Solenoid">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> Analyze
+                </button>
+                <button class="btn-insight-action" data-insight="Main Water Solenoid">
+                  <i class="fa-solid fa-faucet-drip"></i> Take Action
+                </button>
+              </div>
+            </div>
+
+            <!-- 3. Computing Overload -->
+            <div class="glass-card insight-card" style="border-top: 3px solid var(--rose-danger);">
+              <div class="insight-card-top">
+                <div class="insight-type">
+                  <i class="fa-solid fa-microchip" style="color: var(--rose-danger);"></i>
+                  <span>COMPUTING OVERLOAD</span>
+                </div>
+                <span class="badge-status critical">Critical</span>
+              </div>
+
+              <p class="insight-desc">
+                Computing resources are approaching maximum capacity.
+              </p>
+
+              <div class="insight-rec-box">
+                <strong>Recommendation</strong>
+                Balance workloads across available resources.
+              </div>
+
+              <div class="insight-actions">
+                <button class="btn-insight-analyze" data-insight="Server Compute Cluster">
+                  <i class="fa-solid fa-magnifying-glass-chart"></i> Analyze
+                </button>
+                <button class="btn-insight-action" data-insight="Server Compute Cluster">
+                  <i class="fa-solid fa-server"></i> Take Action
+                </button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             8. SMART AUTOMATION CENTER
+             ================================================================ -->
+        <section class="glass-card" id="automation-center">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-robot"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Smart Automation Center</h2>
+                <p class="section-subtitle">Closed-loop autonomous actuation routines for facility energy and water control</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="automation-grid">
+            <!-- 1. Peak Energy Optimizer -->
+            <div class="glass-card automation-card">
+              <div class="automation-card-header">
+                <h3 class="automation-title">Peak Energy Optimizer</h3>
+                <span class="badge-status optimal">Active</span>
+              </div>
+              <p class="automation-desc">
+                Automatically reduce unnecessary energy consumption during peak pricing bands.
+              </p>
+              <div class="automation-footer">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Status: <strong style="color: var(--emerald-success);">Active</strong></span>
+                <button class="btn-run-automation" data-task="Peak Energy Optimizer">Run Now</button>
+              </div>
+            </div>
+
+            <!-- 2. Water Consumption Optimizer -->
+            <div class="glass-card automation-card">
+              <div class="automation-card-header">
+                <h3 class="automation-title">Water Consumption Optimizer</h3>
+                <span class="badge-status optimal" style="color: var(--cyan-primary); border-color: rgba(56, 189, 248, 0.3);">Ready</span>
+              </div>
+              <p class="automation-desc">
+                Detect abnormal water usage and generate alerts or isolate solenoid valves.
+              </p>
+              <div class="automation-footer">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Status: <strong style="color: var(--cyan-primary);">Ready</strong></span>
+                <button class="btn-run-automation" data-task="Water Consumption Optimizer">Run Now</button>
+              </div>
+            </div>
+
+            <!-- 3. Computing Load Balancer -->
+            <div class="glass-card automation-card">
+              <div class="automation-card-header">
+                <h3 class="automation-title">Computing Load Balancer</h3>
+                <span class="badge-status optimal">Active</span>
+              </div>
+              <p class="automation-desc">
+                Balance workloads based on resource availability and migrate non-essential jobs.
+              </p>
+              <div class="automation-footer">
+                <span style="font-size: 0.78rem; color: var(--text-muted);">Status: <strong style="color: var(--emerald-success);">Active</strong></span>
+                <button class="btn-run-automation" data-task="Computing Load Balancer">Run Now</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             9. AI PREDICTIVE ANALYTICS
+             ================================================================ -->
+        <section class="glass-card" id="predictive-analytics">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-chart-line"></i>
+              </div>
+              <div>
+                <h2 class="section-title">AI Predictive Analytics</h2>
+                <p class="section-subtitle">24-hour forward forecast curves with statistical 95% confidence bands</p>
+              </div>
+            </div>
+          </div>
+
+          <!-- 3 Prediction Metric Cards -->
+          <div class="predictive-grid-top">
+            <div class="glass-card prediction-kpi-card">
+              <div class="prediction-metric-info">
+                <span class="prediction-label">Predicted Energy Usage</span>
+                <span class="prediction-val">82%</span>
+                <span class="prediction-horizon">Next 24 Hours</span>
+              </div>
+              <div class="kpi-icon-box kpi-icon-cyan">
+                <i class="fa-solid fa-bolt"></i>
+              </div>
+            </div>
+
+            <div class="glass-card prediction-kpi-card">
+              <div class="prediction-metric-info">
+                <span class="prediction-label">Water Demand</span>
+                <span class="prediction-val">76%</span>
+                <span class="prediction-horizon">Next 24 Hours</span>
+              </div>
+              <div class="kpi-icon-box kpi-icon-emerald">
+                <i class="fa-solid fa-droplet"></i>
+              </div>
+            </div>
+
+            <div class="glass-card prediction-kpi-card">
+              <div class="prediction-metric-info">
+                <span class="prediction-label">Computing Load</span>
+                <span class="prediction-val" style="color: var(--rose-danger);">95%</span>
+                <span class="prediction-horizon">Next 24 Hours</span>
+              </div>
+              <div class="kpi-icon-box kpi-icon-rose">
+                <i class="fa-solid fa-microchip"></i>
+              </div>
+            </div>
+          </div>
+
+          <!-- Prediction Chart -->
+          <div class="prediction-chart-container">
+            <canvas id="predictionChartCanvas"></canvas>
+          </div>
+
+          <!-- Explanation Banner -->
+          <div class="ai-explanation-banner">
+            <i class="fa-solid fa-circle-info"></i>
+            <span>AI predicts future resource usage using historical patterns and anomaly detection.</span>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             10. ALERT CENTER
+             ================================================================ -->
+        <section class="glass-card" id="alert-center">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-bell"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Real-Time Alert Center</h2>
+                <p class="section-subtitle">Real-time alerts triggered by statistical threshold breaches</p>
+              </div>
+            </div>
+
+            <button class="btn-ai-outline" id="viewAllAlertsBtn" style="padding: 6px 14px; font-size: 0.8rem;">
+              View All Alerts
+            </button>
+          </div>
+
+          <div class="alert-list">
+            <!-- 1. Critical -->
+            <div class="alert-item">
+              <div class="alert-item-left">
+                <span class="badge-status critical">Critical</span>
+                <div class="alert-content">
+                  <span class="alert-message">Computing resource overload detected</span>
+                  <span class="alert-timestamp"><i class="fa-regular fa-clock"></i> 2 minutes ago</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn-resolve-alert" data-alert-id="1">Resolve</button>
+              </div>
+            </div>
+
+            <!-- 2. High -->
+            <div class="alert-item">
+              <div class="alert-item-left">
+                <span class="badge-status high">High</span>
+                <div class="alert-content">
+                  <span class="alert-message">Abnormal water consumption detected</span>
+                  <span class="alert-timestamp"><i class="fa-regular fa-clock"></i> 18 minutes ago</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn-resolve-alert" data-alert-id="2">Resolve</button>
+              </div>
+            </div>
+
+            <!-- 3. Medium -->
+            <div class="alert-item">
+              <div class="alert-item-left">
+                <span class="badge-status high" style="background: rgba(245, 158, 11, 0.12); color: var(--amber-warning); border-color: rgba(245, 158, 11, 0.3);">Medium</span>
+                <div class="alert-content">
+                  <span class="alert-message">Electricity usage above normal pattern</span>
+                  <span class="alert-timestamp"><i class="fa-regular fa-clock"></i> 32 minutes ago</span>
+                </div>
+              </div>
+              <div class="alert-actions">
+                <button class="btn-resolve-alert" data-alert-id="3">Resolve</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             11. RESOURCE EFFICIENCY SCORE & BREAKDOWN
+             ================================================================ -->
+        <section class="glass-card" id="efficiency-section">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-award"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Resource Efficiency Score</h2>
+                <p class="section-subtitle">Aggregate campus sustainability and conservation index</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="score-section-grid">
+            <!-- Left Circular Radial Gauge -->
+            <div class="score-circular-wrapper">
+              <div class="radial-gauge-container">
+                <svg class="radial-gauge-svg" viewBox="0 0 160 160">
+                  <defs>
+                    <linearGradient id="cyanEmeraldGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                      <stop offset="0%" stop-color="#38bdf8" />
+                      <stop offset="100%" stop-color="#10b981" />
+                    </linearGradient>
+                  </defs>
+                  <circle class="gauge-bg" cx="80" cy="80" r="70" />
+                  <circle class="gauge-progress" cx="80" cy="80" r="70" />
+                </svg>
+                <div class="radial-gauge-inner">
+                  <span class="score-number" id="efficiencyScoreValue">87%</span>
+                  <span class="score-sublabel">Resource Score</span>
+                </div>
+              </div>
+
+              <span class="score-status-tag">Overall Status: GOOD</span>
+            </div>
+
+            <!-- Right Breakdown Bars -->
+            <div class="score-breakdown-list">
+              <div class="breakdown-row">
+                <div class="breakdown-title-row">
+                  <span>Energy Efficiency</span>
+                  <strong>91%</strong>
+                </div>
+                <div class="progress-track" style="height: 8px;">
+                  <div class="progress-fill fill-emerald" style="width: 91%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-row">
+                <div class="breakdown-title-row">
+                  <span>Water Efficiency</span>
+                  <strong>72%</strong>
+                </div>
+                <div class="progress-track" style="height: 8px;">
+                  <div class="progress-fill fill-amber" style="width: 72%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-row">
+                <div class="breakdown-title-row">
+                  <span>Network Efficiency</span>
+                  <strong>89%</strong>
+                </div>
+                <div class="progress-track" style="height: 8px;">
+                  <div class="progress-fill fill-cyan" style="width: 89%;"></div>
+                </div>
+              </div>
+
+              <div class="breakdown-row">
+                <div class="breakdown-title-row">
+                  <span>Computing Efficiency</span>
+                  <strong>61%</strong>
+                </div>
+                <div class="progress-track" style="height: 8px;">
+                  <div class="progress-fill fill-rose" style="width: 61%;"></div>
+                </div>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             12. AI RECOMMENDATIONS (4 CARDS)
+             ================================================================ -->
+        <section class="glass-card" id="recommendations-section">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-lightbulb"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Autonomous AI Recommendations</h2>
+                <p class="section-subtitle">Prescriptive optimization tasks synthesized from live telemetry</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="recommendations-grid">
+            <!-- 1. Reduce peak-hour electricity -->
+            <div class="glass-card recommendation-card">
+              <div class="rec-card-header">
+                <div class="rec-icon">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <span class="rec-badge">Energy</span>
+              </div>
+              <p class="rec-desc">
+                Reduce peak-hour electricity consumption
+              </p>
+              <div class="rec-footer">
+                <span class="rec-impact">Potential saving: 12%</span>
+                <button class="btn-apply-rec" data-rec-desc="Reduce peak-hour electricity consumption">Apply</button>
+              </div>
+            </div>
+
+            <!-- 2. Investigate abnormal water -->
+            <div class="glass-card recommendation-card">
+              <div class="rec-card-header">
+                <div class="rec-icon" style="background: rgba(56, 189, 248, 0.12); color: var(--cyan-primary);">
+                  <i class="fa-solid fa-droplet"></i>
+                </div>
+                <span class="rec-badge">Water</span>
+              </div>
+              <p class="rec-desc">
+                Investigate abnormal water consumption
+              </p>
+              <div class="rec-footer">
+                <span class="rec-impact">Potential saving: 18%</span>
+                <button class="btn-apply-rec" data-rec-desc="Investigate abnormal water consumption">Apply</button>
+              </div>
+            </div>
+
+            <!-- 3. Optimize computing workloads -->
+            <div class="glass-card recommendation-card">
+              <div class="rec-card-header">
+                <div class="rec-icon" style="background: rgba(244, 63, 94, 0.12); color: var(--rose-danger);">
+                  <i class="fa-solid fa-server"></i>
+                </div>
+                <span class="rec-badge">Compute</span>
+              </div>
+              <p class="rec-desc">
+                Optimize computing workloads
+              </p>
+              <div class="rec-footer">
+                <span class="rec-impact">Potential performance improvement: 23%</span>
+                <button class="btn-apply-rec" data-rec-desc="Optimize computing workloads">Apply</button>
+              </div>
+            </div>
+
+            <!-- 4. Automate repetitive monitoring tasks -->
+            <div class="glass-card recommendation-card">
+              <div class="rec-card-header">
+                <div class="rec-icon" style="background: rgba(16, 185, 129, 0.12); color: var(--emerald-success);">
+                  <i class="fa-solid fa-robot"></i>
+                </div>
+                <span class="rec-badge">Tasks</span>
+              </div>
+              <p class="rec-desc">
+                Automate repetitive monitoring tasks
+              </p>
+              <div class="rec-footer">
+                <span class="rec-impact">Potential efficiency improvement: 15%</span>
+                <button class="btn-apply-rec" data-rec-desc="Automate repetitive monitoring tasks">Apply</button>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             13. DATA SOURCES (4 CARDS)
+             ================================================================ -->
+        <section class="glass-card" id="data-sources-section">
+          <div class="card-header-flex">
+            <div class="section-title-wrap">
+              <div class="section-icon">
+                <i class="fa-solid fa-network-wired"></i>
+              </div>
+              <div>
+                <h2 class="section-title">Connected Data Sources</h2>
+                <p class="section-subtitle">Real-time edge sensor feeds and communication bus connectivity</p>
+              </div>
+            </div>
+          </div>
+
+          <div class="data-sources-grid">
+            <div class="glass-card data-source-card">
+              <div class="ds-info">
+                <div class="ds-icon-box">
+                  <i class="fa-solid fa-bolt"></i>
+                </div>
+                <span class="ds-name">Electricity Sensors</span>
+              </div>
+              <div class="ds-status-pill">
+                <span class="status-dot pulse"></span>
+                <span>Connected</span>
+              </div>
+            </div>
+
+            <div class="glass-card data-source-card">
+              <div class="ds-info">
+                <div class="ds-icon-box">
+                  <i class="fa-solid fa-droplet"></i>
+                </div>
+                <span class="ds-name">Water Monitoring</span>
+              </div>
+              <div class="ds-status-pill">
+                <span class="status-dot pulse"></span>
+                <span>Connected</span>
+              </div>
+            </div>
+
+            <div class="glass-card data-source-card">
+              <div class="ds-info">
+                <div class="ds-icon-box">
+                  <i class="fa-solid fa-wifi"></i>
+                </div>
+                <span class="ds-name">Network Monitor</span>
+              </div>
+              <div class="ds-status-pill">
+                <span class="status-dot pulse"></span>
+                <span>Connected</span>
+              </div>
+            </div>
+
+            <div class="glass-card data-source-card">
+              <div class="ds-info">
+                <div class="ds-icon-box">
+                  <i class="fa-solid fa-hard-drive"></i>
+                </div>
+                <span class="ds-name">Server Metrics</span>
+              </div>
+              <div class="ds-status-pill">
+                <span class="status-dot pulse"></span>
+                <span>Connected</span>
+              </div>
+            </div>
+          </div>
+        </section>
+
+
+        <!-- ================================================================
+             14. REPORT GENERATION
+             ================================================================ -->
+        <section class="glass-card report-gen-card" id="reports-section">
+          <div class="report-gen-info">
+            <div class="section-title-wrap" style="margin-bottom: 8px;">
+              <div class="section-icon">
+                <i class="fa-solid fa-file-lines"></i>
+              </div>
+              <h2 class="section-title">Generate AI Report</h2>
+            </div>
+            <p class="section-subtitle">
+              Synthesize comprehensive energy, water, and compute telemetry audits with AI recommendations.
+            </p>
+          </div>
+
+          <div class="report-btn-group">
+            <button class="btn-report" id="btnDailyReport">
+              <i class="fa-regular fa-calendar-day"></i> Daily Report
+            </button>
+            <button class="btn-report" id="btnWeeklyReport">
+              <i class="fa-regular fa-calendar-week"></i> Weekly Report
+            </button>
+            <button class="btn-report" id="btnMonthlyReport">
+              <i class="fa-regular fa-calendar"></i> Monthly Report
+            </button>
+            <button class="btn-report btn-csv" id="btnDownloadCsv">
+              <i class="fa-solid fa-download"></i> Download CSV Audit
+            </button>
+          </div>
+        </section>
+
+      </main>
+
+
+      <!-- ==================================================================
+           15. FOOTER
+           ================================================================== -->
+      <footer class="app-footer" id="app-footer">
+        <div class="footer-left">
+          <span class="footer-brand">Smart Resource Intelligence & Automation Platform</span>
+          <span class="footer-credits">
+            <strong>AICTE Smart Innovation</strong> • Smart India Hackathon 2026 Prototype
+          </span>
+        </div>
+
+        <div class="footer-status">
+          <span class="status-dot pulse"></span>
+          <span>System Status: All Systems Operational</span>
+        </div>
+      </footer>
+
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       MODAL 1: ADD RESOURCE MODAL
+       ==================================================================== -->
+  <div class="modal-overlay" id="addResourceModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-plus-circle" style="color: var(--cyan-primary);"></i>
+          <span>Register New Campus Resource</span>
+        </h3>
+        <button class="modal-close-btn" id="closeAddResourceModalBtn">&times;</button>
+      </div>
+      <form id="addResourceForm">
+        <div class="modal-body">
+          <div class="form-group">
+            <label for="resNameInput">Resource Name</label>
+            <input type="text" id="resNameInput" class="form-input" placeholder="e.g. Science Complex Solar Microgrid" required>
+          </div>
+          <div class="form-group">
+            <label for="resTypeSelect">Resource Type</label>
+            <select id="resTypeSelect" class="form-select">
+              <option value="electricity">Electricity</option>
+              <option value="water">Water</option>
+              <option value="network">Network Bandwidth</option>
+              <option value="computing">Computing Cluster</option>
+            </select>
+          </div>
+          <div class="form-group">
+            <label for="resCapInput">Total Rated Capacity</label>
+            <input type="number" id="resCapInput" class="form-input" placeholder="e.g. 150" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="resUsageInput">Initial Active Usage</label>
+            <input type="number" id="resUsageInput" class="form-input" placeholder="e.g. 65" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="resLocInput">Campus Location</label>
+            <input type="text" id="resLocInput" class="form-input" placeholder="e.g. Academic Block 3, Rooftop">
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn-ai-outline" id="cancelAddResourceBtn">Cancel</button>
+          <button type="submit" class="btn-ai-primary">
+            <i class="fa-solid fa-check"></i> Register Resource
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- ====================================================================
+       MODAL 2: ML MODEL TESTER (model.pkl / Random Forest via /predict)
+       ==================================================================== -->
+  <div class="modal-overlay" id="mlTesterModal">
+    <div class="modal-box">
+      <div class="modal-header">
+        <h3 class="modal-title">
+          <i class="fa-solid fa-microchip" style="color: var(--cyan-primary);"></i>
+          <span>AI Model Prediction Playground (model.pkl)</span>
+        </h3>
+        <button class="modal-close-btn" id="closeMlTesterBtn">&times;</button>
+      </div>
+      <form id="mlTesterForm">
+        <div class="modal-body">
+          <p style="font-size: 0.84rem; color: var(--text-muted); margin-bottom: 8px;">
+            Run live inference through the trained <code>RandomForestClassifier</code> model generated by <code>train_model.py</code>.
+          </p>
+          <div class="form-group">
+            <label for="mlTempInput">Temperature (°C)</label>
+            <input type="number" id="mlTempInput" class="form-input" value="28" min="0" max="60" required>
+          </div>
+          <div class="form-group">
+            <label for="mlOccInput">Occupancy (Number of People)</label>
+            <input type="number" id="mlOccInput" class="form-input" value="25" min="0" required>
+          </div>
+          <div class="form-group">
+            <label for="mlElecInput">Electricity Usage (kWh)</label>
+            <input type="number" id="mlElecInput" class="form-input" value="320" min="0" step="0.1" required>
+          </div>
+          <div class="form-group">
+            <label for="mlHoursInput">Usage Duration (Hours)</label>
+            <input type="number" id="mlHoursInput" class="form-input" value="7" min="0" max="24" step="0.5" required>
+          </div>
+
+          <!-- Result Area -->
+          <div id="mlResultBox" style="display: none; padding: 14px; border-radius: var(--radius-md); background: rgba(255, 255, 255, 0.04); border: 1px solid var(--glass-border); margin-top: 8px;">
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+              <span style="color: var(--text-muted);">Predicted Usage Level:</span>
+              <strong id="mlUsageLevel" style="color: var(--cyan-primary); font-family: var(--font-mono);">--</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+              <span style="color: var(--text-muted);">Wastage Diagnosis:</span>
+              <strong id="mlWastage" style="color: var(--amber-warning);">--</strong>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-bottom: 6px; font-size: 0.85rem;">
+              <span style="color: var(--text-muted);">Efficiency Rating:</span>
+              <strong id="mlScore" style="color: var(--emerald-success); font-family: var(--font-mono);">--%</strong>
+            </div>
+            <div style="margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--glass-border); font-size: 0.8rem; color: #cbd5e1;">
+              <span style="color: var(--cyan-primary); font-weight: 600;">AI Recommendation:</span>
+              <div id="mlRec" style="margin-top: 2px;">--</div>
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="submit" class="btn-ai-primary" style="width: 100%; justify-content: center;">
+            <i class="fa-solid fa-play"></i> Run AI Model Prediction
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+
+  <!-- Custom Application Script -->
+  <script src="{{ url_for('static', filename='js/app.js') }}"></script>
+</body>
+</html>

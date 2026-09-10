@@ -1,0 +1,197 @@
+{% extends "base.html" %}
+
+{% block page_title %}AI Insight Engine{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h4 class="fw-bold mb-1">
+      <i class="bi bi-cpu text-primary me-1"></i> Autonomous AI Diagnostic & Insight Engine
+    </h4>
+    <p class="text-muted small mb-0">Statistical Z-Score (3.0&sigma;) &bull; Interquartile Range (IQR) &bull; Diurnal Pattern Baselines &bull; Ghost Load Correlation</p>
+  </div>
+  <button class="btn btn-primary" id="btn-run-full-analysis">
+    <i class="bi bi-cpu-fill me-1"></i> Trigger Deep AI Diagnostic Scan
+  </button>
+</div>
+
+<!-- INTELLIGENCE ARCHITECTURE SUMMARY CARD -->
+<div class="card-modern bg-primary-subtle border-primary-subtle mb-4">
+  <div class="card-modern-body py-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-9">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-primary text-white">Local ML Inference</span>
+          <h6 class="fw-bold mb-0 text-primary-emphasis">Zero Paid-API Dependency Architecture</h6>
+        </div>
+        <p class="small text-secondary mb-0">
+          The engine operates directly inside Python using rolling-window Gaussian distributions, non-parametric quantile estimation, and multi-variable occupancy-power regression. Extensible to Gemini/OpenAI sidecars via pluggable adapters.
+        </p>
+      </div>
+      <div class="col-md-3 text-md-end">
+        <div class="small fw-semibold text-muted">Z-Score Threshold: <strong>&plusmn;2.5&sigma;</strong></div>
+        <div class="small fw-semibold text-muted">Baseline Window: <strong>168 Hours</strong></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="card-modern mb-4">
+  <div class="card-modern-body py-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-4">
+        <label class="small text-muted fw-semibold">Filter by Priority Level:</label>
+        <div class="btn-group btn-group-sm w-100 mt-1" role="group" id="severity-filter-group">
+          <button type="button" class="btn btn-outline-secondary active" data-severity="">All</button>
+          <button type="button" class="btn btn-outline-danger" data-severity="CRITICAL">Critical</button>
+          <button type="button" class="btn btn-outline-warning" data-severity="HIGH">High</button>
+          <button type="button" class="btn btn-outline-info" data-severity="MEDIUM">Medium</button>
+          <button type="button" class="btn btn-outline-primary" data-severity="LOW">Low</button>
+        </div>
+      </div>
+
+      <div class="col-md-4">
+        <label class="small text-muted fw-semibold">Filter by Insight Category:</label>
+        <select class="form-select form-select-sm mt-1" id="type-filter">
+          <option value="">All Categories</option>
+          <option value="anomaly">Statistical Telemetry Anomaly</option>
+          <option value="wastage">Detected Inefficiency & Leakage</option>
+          <option value="underutilization">Resource Underutilization</option>
+          <option value="optimization">Operational Optimization</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <span class="small text-muted" id="insights-count-label">Loading insights...</span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- INSIGHTS CARDS CONTAINER -->
+<div id="insights-container" class="row g-3">
+  <div class="col-12 text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-2">Evaluating campus telemetry through AI models...</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('insights-container');
+  const countLabel = document.getElementById('insights-count-label');
+  const typeFilter = document.getElementById('type-filter');
+  const scanBtn = document.getElementById('btn-run-full-analysis');
+  let currentSeverity = '';
+
+  async function loadInsights() {
+    try {
+      let url = `/api/insights?`;
+      if (currentSeverity) url += `severity=${currentSeverity}&`;
+      if (typeFilter.value) url += `type=${typeFilter.value}&`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const items = data.insights || [];
+
+      countLabel.textContent = `Displaying ${items.length} Intelligence Insights`;
+
+      if (items.length === 0) {
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="card-modern text-center py-5">
+              <i class="bi bi-check-circle text-success" style="font-size: 2.5rem;"></i>
+              <h5 class="fw-bold mt-2">No Active Anomalies or Wastage Detected</h5>
+              <p class="text-muted small mb-0">All monitored resources are operating within their statistical baseline.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = items.map(item => {
+        let badgeClass = 'severity-low';
+        let icon = 'bi-info-circle-fill text-primary';
+        if (item.severity === 'CRITICAL') {
+          badgeClass = 'severity-critical';
+          icon = 'bi-exclamation-octagon-fill text-danger';
+        } else if (item.severity === 'HIGH') {
+          badgeClass = 'severity-high';
+          icon = 'bi-exclamation-triangle-fill text-warning';
+        } else if (item.severity === 'MEDIUM') {
+          badgeClass = 'severity-medium';
+          icon = 'bi-exclamation-circle-fill text-warning';
+        }
+
+        return `
+          <div class="col-md-6 col-lg-6">
+            <div class="card-modern h-100">
+              <div class="card-modern-header py-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.72rem;">${item.severity}</span>
+                  <span class="badge-ai" style="font-size: 0.68rem;"><i class="bi bi-stars"></i> AI Powered</span>
+                  <span class="small text-muted text-capitalize">${item.type}</span>
+                </div>
+                <span class="small text-muted">${item.created_at}</span>
+              </div>
+              <div class="card-modern-body">
+                <div class="d-flex gap-3">
+                  <div style="font-size: 1.5rem;" class="flex-shrink-0">${icon.includes('octagon') ? '<i class="bi bi-shield-x text-danger"></i>' : '<i class="bi bi-lightbulb-fill text-warning"></i>'}</div>
+                  <div class="flex-grow-1">
+                    <h6 class="fw-bold mb-1 text-dark">${item.resource_name || 'System Wide Asset'}</h6>
+                    <p class="small text-secondary mb-3">${item.description}</p>
+                    
+                    <div class="p-2 bg-light rounded-2 border">
+                      <div class="small fw-semibold text-primary mb-1">
+                        <i class="bi bi-arrow-right-circle-fill me-1"></i> AI Recommended Action:
+                      </div>
+                      <div class="small text-dark">${item.recommendation}</div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+    } catch(err) {
+      console.error(err);
+      container.innerHTML = '<div class="col-12 text-danger text-center">Failed to load AI insights</div>';
+    }
+  }
+
+  // Severity filter buttons
+  document.querySelectorAll('#severity-filter-group button').forEach(btn => {
+    btn.addEventListener('click', () => {
+      document.querySelectorAll('#severity-filter-group button').forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      currentSeverity = btn.dataset.severity;
+      loadInsights();
+    });
+  });
+
+  typeFilter.addEventListener('change', loadInsights);
+
+  scanBtn.addEventListener('click', async () => {
+    scanBtn.disabled = true;
+    scanBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing Local Neural ML...';
+    try {
+      const res = await fetch('/api/insights/analyze', { method: 'POST' });
+      const data = await res.json();
+      showToast(`AI Scan Complete: ${data.results.new_insights_count} new insights & ${data.results.new_alerts_count} alerts identified!`, 'success');
+      loadInsights();
+    } catch(err) {
+      showToast('AI Diagnostic Scan failed', 'danger');
+    } finally {
+      scanBtn.disabled = false;
+      scanBtn.innerHTML = '<i class="bi bi-cpu-fill me-1"></i> Trigger Deep AI Diagnostic Scan';
+    }
+  });
+
+  loadInsights();
+});
+</script>
+{% endblock %}

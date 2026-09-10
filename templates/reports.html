@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block page_title %}Comprehensive Audit & Compliance Reports{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3 no-print">
+  <div>
+    <h4 class="fw-bold mb-1">
+      <i class="bi bi-file-earmark-bar-graph text-primary me-1"></i> Executive Resource Intelligence Audit
+    </h4>
+    <p class="text-muted small mb-0">Automated performance audits, environmental compliance metrics, and action logs.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-outline-secondary" onclick="window.print()">
+      <i class="bi bi-printer me-1"></i> Print / Save PDF
+    </button>
+    <a href="{{ url_for('api_download_report_csv') }}" class="btn btn-primary">
+      <i class="bi bi-file-earmark-arrow-down me-1"></i> Download CSV Audit File
+    </a>
+  </div>
+</div>
+
+<!-- PRINTABLE AUDIT SHEET CONTAINER -->
+<div class="card-modern p-4 bg-white" id="report-printable-area">
+  <!-- REPORT HEADER -->
+  <div class="d-flex justify-content-between align-items-start border-bottom pb-4 mb-4">
+    <div>
+      <div class="badge bg-primary text-white mb-2 px-2 py-1">AICTE Smart India Hackathon 2026</div>
+      <h3 class="fw-bold text-dark mb-1">Smart Resource Intelligence &amp; Automation Platform</h3>
+      <div class="text-muted small">Comprehensive Asset Health, Wastage Audit &amp; Autonomous Action Log</div>
+    </div>
+    <div class="text-end">
+      <div class="small fw-semibold text-muted">Audit Date &amp; Time</div>
+      <div class="fw-bold font-monospace" id="report-timestamp">--</div>
+      <div class="badge bg-success-subtle text-success mt-1">Status: Certified Optimal</div>
+    </div>
+  </div>
+
+  <!-- EXECUTIVE SCORECARD -->
+  <div class="row g-3 mb-4">
+    <div class="col-md-3">
+      <div class="p-3 bg-light rounded-3 border text-center">
+        <div class="small text-muted fw-semibold text-uppercase">Efficiency Score</div>
+        <div class="display-6 fw-bold text-primary" id="report-score">--</div>
+        <div class="small text-muted" id="report-grade">Grade --</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="p-3 bg-light rounded-3 border text-center">
+        <div class="small text-muted fw-semibold text-uppercase">Total Monitored Assets</div>
+        <div class="display-6 fw-bold text-dark" id="report-resources-count">--</div>
+        <div class="small text-success">100% Telemetry Online</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="p-3 bg-light rounded-3 border text-center">
+        <div class="small text-muted fw-semibold text-uppercase">Wastage Incidents</div>
+        <div class="display-6 fw-bold text-warning" id="report-waste-count">--</div>
+        <div class="small text-muted">Under Active Mitigation</div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="p-3 bg-light rounded-3 border text-center">
+        <div class="small text-muted fw-semibold text-uppercase">Automated Interventions</div>
+        <div class="display-6 fw-bold text-success" id="report-actions-count">--</div>
+        <div class="small text-success">Closed-Loop Mitigations</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 1: ASSET UTILIZATION TABLE -->
+  <div class="mb-4">
+    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+      <i class="bi bi-box-seam me-2 text-primary"></i>1. Resource Inventory &amp; Telemetry State
+    </h5>
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Asset Name</th>
+            <th>Type</th>
+            <th>Location</th>
+            <th>Current Usage</th>
+            <th>Total Capacity</th>
+            <th>Utilization %</th>
+            <th>Health Status</th>
+          </tr>
+        </thead>
+        <tbody id="report-resources-body">
+          <tr>
+            <td colspan="7" class="text-center py-3 text-muted">Loading audit inventory...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 2: RECENT AUTOMATION EXECUTIONS -->
+  <div class="mb-4">
+    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+      <i class="bi bi-cpu me-2 text-success"></i>2. Autonomous Actuator Mitigations (Recent Log)
+    </h5>
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Rule Name</th>
+            <th>Trigger Evaluated</th>
+            <th>Autonomous Action Performed</th>
+            <th>Status</th>
+          </tr>
+        </thead>
+        <tbody id="report-actions-body">
+          <tr>
+            <td colspan="5" class="text-center py-3 text-muted">Loading action history...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- SECTION 3: TOP RECOMMENDATIONS & ROI PROJECTIONS -->
+  <div class="mb-2">
+    <h5 class="fw-bold text-dark border-bottom pb-2 mb-3">
+      <i class="bi bi-lightbulb me-2 text-warning"></i>3. AI Recommendations &amp; Estimated Savings
+    </h5>
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Priority</th>
+            <th>Opportunity / Title</th>
+            <th>AI Strategy Action</th>
+            <th>Quantified Expected ROI / Conservation Benefit</th>
+          </tr>
+        </thead>
+        <tbody id="report-recs-body">
+          <tr>
+            <td colspan="4" class="text-center py-3 text-muted">Loading recommendations...</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- REPORT FOOTER -->
+  <div class="pt-4 mt-4 border-top text-center text-muted small">
+    <div>Generated by <strong>Smart Resource Intelligence &amp; Automation Platform</strong> (SIH 2026 Prototype).</div>
+    <div>Telemetry integrity verified through statistical Z-Score Gaussian modeling and SQLite ACID ledger.</div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  try {
+    const res = await fetch('/api/reports/generate', { method: 'POST' });
+    const data = await res.json();
+
+    document.getElementById('report-timestamp').textContent = data.generated_at;
+    document.getElementById('report-score').textContent = `${data.efficiency.score}/100`;
+    document.getElementById('report-grade').textContent = `Grade ${data.efficiency.grade} (${data.efficiency.status})`;
+    document.getElementById('report-resources-count').textContent = data.total_resources;
+    document.getElementById('report-waste-count').textContent = data.wastage_count;
+    document.getElementById('report-actions-count').textContent = data.actions_count;
+
+    // Resources Table
+    const resBody = document.getElementById('report-resources-body');
+    resBody.innerHTML = (data.resources || []).map(r => {
+      const pct = r.capacity > 0 ? ((r.current_usage / r.capacity) * 100).toFixed(1) : 0;
+      return `
+        <tr>
+          <td class="fw-semibold text-dark">${r.name}</td>
+          <td><span class="badge bg-light text-dark border text-uppercase">${r.type}</span></td>
+          <td class="text-muted small">${r.location}</td>
+          <td class="fw-bold">${r.current_usage} ${r.unit}</td>
+          <td>${r.capacity} ${r.unit}</td>
+          <td>
+            <div class="d-flex align-items-center gap-2">
+              <span class="small fw-semibold">${pct}%</span>
+              <div class="progress flex-grow-1" style="height: 6px;">
+                <div class="progress-bar ${pct > 85 ? 'bg-danger' : (pct > 70 ? 'bg-warning' : 'bg-success')}" style="width: ${pct}%"></div>
+              </div>
+            </div>
+          </td>
+          <td><span class="badge badge-status badge-${r.status.toLowerCase()}">${r.status}</span></td>
+        </tr>
+      `;
+    }).join('');
+
+    // Actions Table
+    const actBody = document.getElementById('report-actions-body');
+    actBody.innerHTML = (data.recent_actions || []).map(act => `
+      <tr>
+        <td class="text-muted small">${act.timestamp}</td>
+        <td class="fw-semibold text-dark">${act.rule_name}</td>
+        <td class="small text-danger">${act.trigger}</td>
+        <td class="small text-secondary">${act.action}</td>
+        <td><span class="badge bg-success-subtle text-success">${act.status}</span></td>
+      </tr>
+    `).join('');
+
+    // Recommendations Table
+    const recBody = document.getElementById('report-recs-body');
+    recBody.innerHTML = (data.recommendations || []).map(rec => {
+      let badgeClass = 'severity-low';
+      if (rec.priority === 'CRITICAL') badgeClass = 'severity-critical';
+      else if (rec.priority === 'HIGH') badgeClass = 'severity-high';
+      else if (rec.priority === 'MEDIUM') badgeClass = 'severity-medium';
+
+      return `
+        <tr>
+          <td><span class="badge ${badgeClass} px-2 py-1">${rec.priority}</span></td>
+          <td class="fw-semibold text-dark">${rec.title}</td>
+          <td class="small text-secondary">${rec.description}</td>
+          <td class="small text-success fw-semibold">${rec.expected_benefit}</td>
+        </tr>
+      `;
+    }).join('');
+
+  } catch(err) {
+    console.error(err);
+  }
+});
+</script>
+{% endblock %}

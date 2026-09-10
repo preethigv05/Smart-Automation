@@ -1,0 +1,247 @@
+{% extends "base.html" %}
+
+{% block page_title %}Operational Intelligence Dashboard{% endblock %}
+
+{% block content %}
+<!-- ROW 1: PRIMARY KPI METRIC CARDS -->
+<div class="row g-3 mb-4">
+  <!-- 1. Total Resources -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Total Resources</div>
+        <div class="kpi-value" id="kpi-total-resources">--</div>
+        <div class="kpi-subtext"><span class="text-success fw-semibold" id="kpi-active-resources">--</span> actively monitored</div>
+      </div>
+      <div class="kpi-icon-box bg-primary-subtle text-primary">
+        <i class="bi bi-box-seam"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 2. Current Utilization % -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Avg Utilization</div>
+        <div class="kpi-value" id="kpi-utilization">--%</div>
+        <div class="kpi-subtext" id="kpi-util-subtext">Across campus assets</div>
+      </div>
+      <div class="kpi-icon-box bg-info-subtle text-info">
+        <i class="bi bi-speedometer2"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 3. Detected Wastage -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Detected Wastage</div>
+        <div class="kpi-value text-warning" id="kpi-wastage">--</div>
+        <div class="kpi-subtext">Ghost load & leak signatures</div>
+      </div>
+      <div class="kpi-icon-box bg-warning-subtle text-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 4. Active Anomalies -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Active Anomalies</div>
+        <div class="kpi-value text-danger" id="kpi-anomalies">--</div>
+        <div class="kpi-subtext">Z-Score &gt; 2.5 deviations</div>
+      </div>
+      <div class="kpi-icon-box bg-danger-subtle text-danger">
+        <i class="bi bi-shield-exclamation"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 5. Automated Actions -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Automations</div>
+        <div class="kpi-value text-success" id="kpi-actions">--</div>
+        <div class="kpi-subtext">Auto-executed actuations</div>
+      </div>
+      <div class="kpi-icon-box bg-success-subtle text-success">
+        <i class="bi bi-cpu-fill"></i>
+      </div>
+    </div>
+  </div>
+
+  <!-- 6. Available Capacity -->
+  <div class="col-xl-2 col-md-4 col-sm-6">
+    <div class="kpi-card">
+      <div>
+        <div class="kpi-title">Available State</div>
+        <div class="kpi-value" id="kpi-available">--</div>
+        <div class="kpi-subtext">Healthy operating nodes</div>
+      </div>
+      <div class="kpi-icon-box bg-purple-subtle text-purple">
+        <i class="bi bi-check2-circle"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 2: CIRCULAR EFFICIENCY GAUGE & REAL-TIME UTILIZATION CHARTS -->
+<div class="row g-4 mb-4">
+  <!-- Circular Efficiency Score (Module 9) -->
+  <div class="col-xl-4 col-lg-5">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h3 class="card-modern-title">
+          <i class="bi bi-pie-chart-fill text-primary"></i> Resource Efficiency Score
+        </h3>
+        <span class="badge-ai">AI Evaluated</span>
+      </div>
+      <div class="card-modern-body text-center d-flex flex-column justify-content-center">
+        <!-- Circular Gauge Container -->
+        <div class="gauge-container mb-3">
+          <canvas id="efficiencyGaugeChart"></canvas>
+          <div class="gauge-center-text">
+            <div class="gauge-score" id="efficiency-score-display">--</div>
+            <div class="gauge-label" id="efficiency-grade-display">Grade --</div>
+          </div>
+        </div>
+
+        <div class="mb-3">
+          <span class="badge px-3 py-2 fs-6 rounded-pill" id="efficiency-status-badge">Calculating...</span>
+        </div>
+
+        <!-- Breakdown Progress Bars -->
+        <div class="text-start px-2 mt-2">
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Utilization Health</span>
+            <span class="fw-semibold text-dark" id="score-util-val">--/40</span>
+          </div>
+          <div class="progress progress-thin mb-3">
+            <div class="progress-bar bg-primary" id="score-util-bar" style="width: 0%"></div>
+          </div>
+
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Anomaly Safety</span>
+            <span class="fw-semibold text-dark" id="score-anomaly-val">--/25</span>
+          </div>
+          <div class="progress progress-thin mb-3">
+            <div class="progress-bar bg-info" id="score-anomaly-bar" style="width: 0%"></div>
+          </div>
+
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Wastage Mitigation</span>
+            <span class="fw-semibold text-dark" id="score-waste-val">--/20</span>
+          </div>
+          <div class="progress progress-thin mb-3">
+            <div class="progress-bar bg-warning" id="score-waste-bar" style="width: 0%"></div>
+          </div>
+
+          <div class="d-flex justify-content-between small text-muted mb-1">
+            <span>Automation Responsiveness</span>
+            <span class="fw-semibold text-dark" id="score-auto-val">--/15</span>
+          </div>
+          <div class="progress progress-thin">
+            <div class="progress-bar bg-success" id="score-auto-bar" style="width: 0%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Resource Utilization Bar Chart -->
+  <div class="col-xl-8 col-lg-7">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h3 class="card-modern-title">
+          <i class="bi bi-bar-chart-fill text-info"></i> Resource Utilization by Asset
+        </h3>
+        <div class="btn-group btn-group-sm">
+          <button type="button" class="btn btn-outline-secondary active" id="btn-chart-pct">Utilization %</button>
+          <button type="button" class="btn btn-outline-secondary" id="btn-chart-raw">Absolute Units</button>
+        </div>
+      </div>
+      <div class="card-modern-body">
+        <div style="height: 320px; position: relative;">
+          <canvas id="resourceUtilizationChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 3: RECENT AI INSIGHTS & SMART AUTOMATION LOG -->
+<div class="row g-4">
+  <!-- Recent AI Insights -->
+  <div class="col-lg-6">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h3 class="card-modern-title">
+          <i class="bi bi-cpu text-warning"></i> Recent AI Insights & Anomalies
+        </h3>
+        <a href="{{ url_for('insights_page') }}" class="btn btn-sm btn-outline-primary">View All</a>
+      </div>
+      <div class="card-modern-body p-0">
+        <div class="list-group list-group-flush" id="recent-insights-list">
+          <div class="p-4 text-center text-muted">
+            <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+            <span class="ms-2">Loading intelligence telemetry...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Recent Automated Actions -->
+  <div class="col-lg-6">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h3 class="card-modern-title">
+          <i class="bi bi-lightning-charge text-success"></i> Smart Automation Decisions
+        </h3>
+        <a href="{{ url_for('automation_page') }}" class="btn btn-sm btn-outline-success">View Engine</a>
+      </div>
+      <div class="card-modern-body p-0">
+        <div class="list-group list-group-flush" id="recent-actions-list">
+          <div class="p-4 text-center text-muted">
+            <div class="spinner-border spinner-border-sm text-success" role="status"></div>
+            <span class="ms-2">Loading automation records...</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ROW 4: QUICK ACTION BAR -->
+<div class="card-modern mt-4 bg-light border-dashed">
+  <div class="card-modern-body d-flex flex-wrap align-items-center justify-content-between gap-3 py-3">
+    <div>
+      <h6 class="fw-bold mb-0"><i class="bi bi-sliders2 text-primary me-2"></i>Quick Orchestration Tools</h6>
+      <p class="text-muted small mb-0">Trigger local AI diagnostic scans, generate sensor jitter, or run rule tests on the fly.</p>
+    </div>
+    <div class="d-flex flex-wrap gap-2">
+      <button class="btn btn-outline-primary btn-sm" id="btn-run-ai-scan">
+        <i class="bi bi-search"></i> Run AI Anomaly Diagnostic
+      </button>
+      <button class="btn btn-outline-warning btn-sm" id="btn-inject-anomaly">
+        <i class="bi bi-bug"></i> Inject Test Surge Spike
+      </button>
+      <button class="btn btn-outline-success btn-sm" id="btn-exec-automation">
+        <i class="bi bi-play-circle"></i> Run Automation Engine
+      </button>
+      <a href="{{ url_for('api_download_report_csv') }}" class="btn btn-outline-dark btn-sm">
+        <i class="bi bi-download"></i> Download Audit CSV
+      </a>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="{{ url_for('static', filename='js/dashboard.js') }}"></script>
+{% endblock %}

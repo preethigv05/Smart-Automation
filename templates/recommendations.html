@@ -1,0 +1,142 @@
+{% extends "base.html" %}
+
+{% block page_title %}AI Recommendation Center{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h4 class="fw-bold mb-1">
+      <i class="bi bi-lightbulb-fill text-warning me-1"></i> Autonomous Efficiency & Conservation Advisories
+    </h4>
+    <p class="text-muted small mb-0">Actionable interventions synthesized from continuous consumption baseline deviations and occupancy correlations.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <select class="form-select form-select-sm" id="rec-filter-status" style="width: 170px;">
+      <option value="Pending" selected>Pending Action</option>
+      <option value="Applied">Applied History</option>
+      <option value="">All Recommendations</option>
+    </select>
+  </div>
+</div>
+
+<!-- RECOMMENDATIONS GRID CONTAINER -->
+<div id="recommendations-container" class="row g-4">
+  <div class="col-12 text-center py-5">
+    <div class="spinner-border text-primary" role="status"></div>
+    <p class="text-muted mt-2">Formulating AI resource recommendations...</p>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const container = document.getElementById('recommendations-container');
+  const statusFilter = document.getElementById('rec-filter-status');
+
+  async function loadRecommendations() {
+    try {
+      let url = `/api/recommendations?`;
+      if (statusFilter.value) url += `status=${statusFilter.value}&`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const recs = data.recommendations || [];
+
+      if (recs.length === 0) {
+        container.innerHTML = `
+          <div class="col-12">
+            <div class="card-modern text-center py-5">
+              <i class="bi bi-check-circle-fill text-success" style="font-size: 2.5rem;"></i>
+              <h5 class="fw-bold mt-2">All Recommendations Applied!</h5>
+              <p class="text-muted small mb-0">Operational efficiency is currently maximized across all campus assets.</p>
+            </div>
+          </div>
+        `;
+        return;
+      }
+
+      container.innerHTML = recs.map(rec => {
+        let badgeClass = 'severity-low';
+        if (rec.priority === 'CRITICAL') badgeClass = 'severity-critical';
+        else if (rec.priority === 'HIGH') badgeClass = 'severity-high';
+        else if (rec.priority === 'MEDIUM') badgeClass = 'severity-medium';
+
+        const isApplied = rec.status === 'Applied';
+
+        return `
+          <div class="col-md-6 col-lg-6">
+            <div class="card-modern h-100 border-start border-4 ${rec.priority === 'CRITICAL' ? 'border-danger' : (rec.priority === 'HIGH' ? 'border-warning' : 'border-primary')}">
+              <div class="card-modern-header py-2">
+                <div class="d-flex align-items-center gap-2">
+                  <span class="badge ${badgeClass} px-2 py-1" style="font-size: 0.72rem;">${rec.priority}</span>
+                  <span class="badge-ai" style="font-size: 0.68rem;"><i class="bi bi-stars"></i> AI Strategy</span>
+                  <span class="small text-muted">${rec.resource_name || 'Campus Wide'}</span>
+                </div>
+                <span class="badge ${isApplied ? 'bg-success-subtle text-success' : 'bg-warning-subtle text-warning'}">
+                  ${rec.status}
+                </span>
+              </div>
+              <div class="card-modern-body">
+                <h5 class="fw-bold text-dark mb-2">${rec.title}</h5>
+                
+                <div class="mb-3">
+                  <div class="small fw-semibold text-muted mb-1">Recommended Action:</div>
+                  <div class="small text-secondary bg-light p-2 rounded border">${rec.description}</div>
+                </div>
+
+                <div class="mb-4">
+                  <div class="small fw-semibold text-success mb-1">
+                    <i class="bi bi-cash-coin me-1"></i> Quantified Expected Benefit:
+                  </div>
+                  <div class="small fw-bold text-success-emphasis p-2 bg-success-subtle rounded border border-success-subtle">
+                    ${rec.expected_benefit}
+                  </div>
+                </div>
+
+                <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                  <span class="small text-muted">Created: ${rec.created_at}</span>
+                  ${!isApplied ? `
+                    <button class="btn btn-primary btn-sm px-3 btn-apply-rec" data-id="${rec.id}">
+                      <i class="bi bi-check-lg me-1"></i> Apply Optimization
+                    </button>
+                  ` : `
+                    <span class="small text-success fw-bold">
+                      <i class="bi bi-check-circle-fill me-1"></i> Optimization Active
+                    </span>
+                  `}
+                </div>
+              </div>
+            </div>
+          </div>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.btn-apply-rec').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const recId = btn.dataset.id;
+          btn.disabled = true;
+          btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Applying...';
+          try {
+            const res = await fetch(`/api/recommendations/${recId}/apply`, { method: 'PUT' });
+            const data = await res.json();
+            showToast(data.message, 'success');
+            loadRecommendations();
+          } catch(err) {
+            showToast('Failed to apply recommendation', 'danger');
+            btn.disabled = false;
+          }
+        });
+      });
+
+    } catch(err) {
+      console.error(err);
+      container.innerHTML = '<div class="col-12 text-danger text-center">Failed to load recommendations</div>';
+    }
+  }
+
+  statusFilter.addEventListener('change', loadRecommendations);
+  loadRecommendations();
+});
+</script>
+{% endblock %}

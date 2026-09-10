@@ -1,0 +1,344 @@
+{% extends "base.html" %}
+
+{% block page_title %}Data Sources & Ingestion{% endblock %}
+
+{% block content %}
+<div class="mb-4">
+  <h4 class="fw-bold mb-1">Multi-Source Telemetry Ingestion Hub</h4>
+  <p class="text-muted small mb-0">Aggregate sensor telemetry from physical IoT gateways, CSV spreadsheets, manual logs, and real-time simulators.</p>
+</div>
+
+<!-- INGESTION MODES ROW -->
+<div class="row g-4 mb-4">
+  <!-- MODE 1: IoT VIRTUAL SENSOR SIMULATOR -->
+  <div class="col-lg-4">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h5 class="card-modern-title">
+          <i class="bi bi-broadcast text-primary"></i> Virtual Sensor Simulator
+        </h5>
+        <span class="badge bg-success-subtle text-success">Active Stream</span>
+      </div>
+      <div class="card-modern-body">
+        <p class="text-muted small">
+          Simulates live edge IoT telemetry across all monitored campus assets (Electricity, Water meters, Computer Labs, Room PIR sensors, Network Switches).
+        </p>
+
+        <div class="form-check form-switch mb-3">
+          <input class="form-check-input" type="checkbox" id="sim-inject-anomaly-toggle">
+          <label class="form-check-label small fw-semibold" for="sim-inject-anomaly-toggle">
+            Inject Artificial Anomaly Spike (for AI testing)
+          </label>
+        </div>
+
+        <div class="d-grid gap-2">
+          <button class="btn btn-primary" id="btn-trigger-simulator">
+            <i class="bi bi-play-circle me-1"></i> Stream Real-Time Readings
+          </button>
+          <button class="btn btn-outline-danger btn-sm" id="btn-trigger-surge-leak">
+            <i class="bi bi-droplet-half me-1"></i> Inject Massive Water Leak Spike
+          </button>
+        </div>
+
+        <div class="p-3 bg-light rounded mt-3 small text-muted">
+          <i class="bi bi-info-circle me-1 text-primary"></i> Each simulation tick updates the database, re-evaluates Z-scores, and triggers smart automation if thresholds are breached.
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 2: CSV BATCH IMPORT -->
+  <div class="col-lg-4">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h5 class="card-modern-title">
+          <i class="bi bi-file-earmark-spreadsheet text-success"></i> CSV Batch Telemetry
+        </h5>
+        <span class="badge bg-secondary-subtle text-secondary">Batch Sync</span>
+      </div>
+      <div class="card-modern-body">
+        <p class="text-muted small">
+          Upload bulk historical telemetry or exported smart meter logs in standard CSV format.
+        </p>
+
+        <form id="csvUploadForm" enctype="multipart/form-data">
+          <div class="mb-3">
+            <label class="form-label small fw-semibold">Select CSV File</label>
+            <input class="form-control" type="file" id="csvFileInput" accept=".csv" required>
+          </div>
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-success" id="btn-upload-csv">
+              <i class="bi bi-cloud-arrow-up me-1"></i> Ingest CSV Telemetry
+            </button>
+            <button type="button" class="btn btn-outline-secondary btn-sm" id="btn-download-sample-csv">
+              <i class="bi bi-file-earmark-arrow-down me-1"></i> Download Sample CSV Template
+            </button>
+          </div>
+        </form>
+
+        <div class="mt-3 small text-muted font-monospace bg-light p-2 rounded">
+          resource_id, value, occupancy, timestamp
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MODE 3: MANUAL TELEMETRY INJECTION -->
+  <div class="col-lg-4">
+    <div class="card-modern h-100">
+      <div class="card-modern-header">
+        <h5 class="card-modern-title">
+          <i class="bi bi-pencil-square text-info"></i> Manual Log Entry
+        </h5>
+        <span class="badge bg-info-subtle text-info">Auditor Tool</span>
+      </div>
+      <div class="card-modern-body">
+        <form id="manualReadingForm">
+          <div class="mb-2">
+            <label class="form-label small fw-semibold">Target Resource</label>
+            <select class="form-select form-select-sm" id="manual-res-id" required>
+              <option value="">Select Resource...</option>
+            </select>
+          </div>
+
+          <div class="row g-2 mb-2">
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Meter Value</label>
+              <input type="number" step="0.1" class="form-control form-control-sm" id="manual-value" required placeholder="Usage value">
+            </div>
+            <div class="col-6">
+              <label class="form-label small fw-semibold">Occupancy (PIR)</label>
+              <input type="number" class="form-control form-control-sm" id="manual-occupancy" value="0" placeholder="0 if empty">
+            </div>
+          </div>
+
+          <div class="d-grid mt-3">
+            <button type="submit" class="btn btn-info text-white" id="btn-submit-manual">
+              <i class="bi bi-check-lg me-1"></i> Commit Reading
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- RECENT INGESTED TELEMETRY STREAM TABLE -->
+<div class="card-modern">
+  <div class="card-modern-header">
+    <h5 class="card-modern-title">
+      <i class="bi bi-clock-history text-secondary"></i> Live Telemetry Audit Stream
+    </h5>
+    <div class="d-flex align-items-center gap-2">
+      <select class="form-select form-select-sm" id="telemetry-filter-resource" style="width: 220px;">
+        <option value="">All Monitored Assets</option>
+      </select>
+      <button class="btn btn-sm btn-outline-secondary" id="btn-refresh-telemetry">
+        <i class="bi bi-arrow-repeat"></i> Refresh
+      </button>
+    </div>
+  </div>
+  <div class="card-modern-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>ID</th>
+            <th>Resource Asset</th>
+            <th>Reading Value</th>
+            <th>Room Occupancy</th>
+            <th>Telemetry Timestamp</th>
+            <th>AI Immediate Status</th>
+          </tr>
+        </thead>
+        <tbody id="telemetry-stream-body">
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              <span class="ms-2">Fetching telemetry readings...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', async () => {
+  const simBtn = document.getElementById('btn-trigger-simulator');
+  const surgeBtn = document.getElementById('btn-trigger-surge-leak');
+  const resSelect = document.getElementById('manual-res-id');
+  const filterSelect = document.getElementById('telemetry-filter-resource');
+  const streamBody = document.getElementById('telemetry-stream-body');
+  const manualForm = document.getElementById('manualReadingForm');
+  const csvForm = document.getElementById('csvUploadForm');
+
+  // Load resources for dropdowns
+  async function loadResources() {
+    try {
+      const res = await fetch('/api/resources');
+      const data = await res.json();
+      resSelect.innerHTML = '<option value="">Select Resource...</option>';
+      filterSelect.innerHTML = '<option value="">All Monitored Assets</option>';
+      (data.resources || []).forEach(r => {
+        resSelect.innerHTML += `<option value="${r.id}">${r.name} (${r.unit})</option>`;
+        filterSelect.innerHTML += `<option value="${r.id}">${r.name}</option>`;
+      });
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  // Load telemetry stream
+  async function loadTelemetry() {
+    try {
+      const rId = filterSelect.value;
+      const url = rId ? `/api/readings?resource_id=${rId}&limit=20` : '/api/readings?limit=20';
+      const res = await fetch(url);
+      const data = await res.json();
+      
+      if (!data.readings || data.readings.length === 0) {
+        streamBody.innerHTML = '<tr><td colspan="6" class="text-center py-4 text-muted">No telemetry records found.</td></tr>';
+        return;
+      }
+
+      streamBody.innerHTML = data.readings.map(r => `
+        <tr>
+          <td><span class="font-monospace text-muted">#${r.id}</span></td>
+          <td class="fw-semibold">${r.resource_name || 'Asset #' + r.resource_id}</td>
+          <td><span class="fw-bold text-dark">${r.value}</span> <span class="small text-muted">${r.unit || ''}</span></td>
+          <td>${r.occupancy !== null ? `${r.occupancy} persons` : 'N/A'}</td>
+          <td class="text-muted small">${r.timestamp}</td>
+          <td>
+            <span class="badge bg-success-subtle text-success">Normalized</span>
+          </td>
+        </tr>
+      `).join('');
+    } catch(err) {
+      console.error(err);
+    }
+  }
+
+  // Simulator button handler
+  simBtn.addEventListener('click', async () => {
+    const withAnomaly = document.getElementById('sim-inject-anomaly-toggle').checked;
+    simBtn.disabled = true;
+    simBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Streaming...';
+    try {
+      const res = await fetch('/api/simulate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ with_anomaly: withAnomaly })
+      });
+      const data = await res.json();
+      showToast(withAnomaly ? 'Anomaly spike generated & analyzed by AI!' : 'Simulated sensor readings streamed!', 'success');
+      loadTelemetry();
+    } catch(err) {
+      showToast('Simulation failed', 'danger');
+    } finally {
+      simBtn.disabled = false;
+      simBtn.innerHTML = '<i class="bi bi-play-circle me-1"></i> Stream Real-Time Readings';
+    }
+  });
+
+  // Surge leak trigger
+  surgeBtn.addEventListener('click', async () => {
+    surgeBtn.disabled = true;
+    surgeBtn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Injecting...';
+    try {
+      const res = await fetch('/api/simulate', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ with_anomaly: true })
+      });
+      showToast('Surge water leak simulated! Critical alert dispatched.', 'warning');
+      loadTelemetry();
+    } catch(err) {
+      showToast('Simulation failed', 'danger');
+    } finally {
+      surgeBtn.disabled = false;
+      surgeBtn.innerHTML = '<i class="bi bi-droplet-half me-1"></i> Inject Massive Water Leak Spike';
+    }
+  });
+
+  // Manual reading form
+  manualForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const payload = {
+      resource_id: parseInt(resSelect.value),
+      value: parseFloat(document.getElementById('manual-value').value),
+      occupancy: parseFloat(document.getElementById('manual-occupancy').value || 0)
+    };
+    try {
+      const res = await fetch('/api/readings', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify(payload)
+      });
+      const data = await res.json();
+      showToast('Reading saved successfully', 'success');
+      manualForm.reset();
+      loadTelemetry();
+    } catch(err) {
+      showToast('Failed to save reading', 'danger');
+    }
+  });
+
+  // CSV Upload form
+  csvForm.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const fileInput = document.getElementById('csvFileInput');
+    if (!fileInput.files.length) return;
+
+    const formData = new FormData();
+    formData.append('file', fileInput.files[0]);
+
+    const btn = document.getElementById('btn-upload-csv');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Ingesting...';
+
+    try {
+      const res = await fetch('/api/readings/upload-csv', {
+        method: 'POST',
+        body: formData
+      });
+      const data = await res.json();
+      if (res.ok) {
+        showToast(data.message, 'success');
+        csvForm.reset();
+        loadTelemetry();
+      } else {
+        showToast(data.error || 'CSV upload failed', 'danger');
+      }
+    } catch(err) {
+      showToast('Failed to upload CSV', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = '<i class="bi bi-cloud-arrow-up me-1"></i> Ingest CSV Telemetry';
+    }
+  });
+
+  // Download Sample CSV
+  document.getElementById('btn-download-sample-csv').addEventListener('click', () => {
+    const csvContent = "resource_id,value,occupancy,timestamp\n1,345.5,120,2026-09-10 12:00:00\n2,72.4,120,2026-09-10 12:00:00\n3,65.0,40,2026-09-10 12:00:00\n4,45.0,45,2026-09-10 12:00:00\n5,620.0,200,2026-09-10 12:00:00";
+    const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.setAttribute("href", url);
+    link.setAttribute("download", "sample_resource_telemetry.csv");
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  });
+
+  filterSelect.addEventListener('change', loadTelemetry);
+  document.getElementById('btn-refresh-telemetry').addEventListener('click', loadTelemetry);
+
+  await loadResources();
+  await loadTelemetry();
+});
+</script>
+{% endblock %}

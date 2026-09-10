@@ -1,0 +1,228 @@
+{% extends "base.html" %}
+
+{% block page_title %}Smart Automation Engine{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h4 class="fw-bold mb-1">
+      <i class="bi bi-gear-wide-connected text-success me-1"></i> Autonomous Action & Rule Engine
+    </h4>
+    <p class="text-muted small mb-0">Closed-loop trigger-condition-action orchestration: Closed-loop load shedding, eco-sleep clamps, and simulated isolation actuators.</p>
+  </div>
+  <div class="d-flex gap-2">
+    <button class="btn btn-success" id="btn-run-automation-now">
+      <i class="bi bi-play-fill me-1"></i> Run Automation Engine Now
+    </button>
+    <button class="btn btn-outline-primary" id="btn-simulate-actuators">
+      <i class="bi bi-lightning-charge me-1"></i> Auto Execute Simulation
+    </button>
+  </div>
+</div>
+
+<!-- REAL-TIME STATUS CALLOUT -->
+<div class="card-modern bg-success-subtle border-success-subtle mb-4">
+  <div class="card-modern-body py-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-9">
+        <div class="d-flex align-items-center gap-2 mb-1">
+          <span class="badge bg-success text-white">Closed-Loop Autonomous Controller</span>
+          <h6 class="fw-bold mb-0 text-success-emphasis">Virtual Actuation Layer Active</h6>
+        </div>
+        <p class="small text-secondary mb-0">
+          The automation engine checks active telemetry triggers against configurable rules. When triggers fire, it issues simulated BACnet/Modbus actuator commands to clamp runaway energy or water consumption, logging every step into an immutable audit trail.
+        </p>
+      </div>
+      <div class="col-md-3 text-md-end">
+        <span class="badge bg-white text-dark border px-3 py-2">
+          <i class="bi bi-shield-check text-success me-1"></i> Auto-Execution Mode: <strong>ENABLED</strong>
+        </span>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- CONFIGURED SMART AUTOMATION RULES TABLE -->
+<div class="card-modern mb-4">
+  <div class="card-modern-header">
+    <h5 class="card-modern-title">
+      <i class="bi bi-diagram-3-fill text-primary"></i> Configured Autonomous Rules
+    </h5>
+    <span class="badge bg-primary-subtle text-primary">5 Rules Active</span>
+  </div>
+  <div class="card-modern-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Rule Identifier</th>
+            <th>Resource Type</th>
+            <th>Trigger Condition</th>
+            <th>Automated Actuator Action</th>
+            <th>Auto-Execute</th>
+            <th>Rule Status</th>
+            <th class="text-end">Toggle</th>
+          </tr>
+        </thead>
+        <tbody id="rules-table-body">
+          <tr>
+            <td colspan="7" class="text-center py-4 text-muted">
+              <div class="spinner-border spinner-border-sm text-primary" role="status"></div>
+              <span class="ms-2">Loading automation rules...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+
+<!-- AUTOMATION EXECUTION AUDIT TRAIL LOG -->
+<div class="card-modern">
+  <div class="card-modern-header">
+    <h5 class="card-modern-title">
+      <i class="bi bi-clock-history text-secondary"></i> Autonomous Execution Audit Trail
+    </h5>
+    <button class="btn btn-sm btn-outline-secondary" id="btn-refresh-audit">
+      <i class="bi bi-arrow-repeat"></i> Refresh Log
+    </button>
+  </div>
+  <div class="card-modern-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Timestamp</th>
+            <th>Target Resource</th>
+            <th>Trigger Reason</th>
+            <th>Automated Mitigation Executed</th>
+            <th>Execution Status</th>
+          </tr>
+        </thead>
+        <tbody id="audit-log-body">
+          <tr>
+            <td colspan="5" class="text-center py-4 text-muted">
+              <div class="spinner-border spinner-border-sm text-secondary" role="status"></div>
+              <span class="ms-2">Loading audit history...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const rulesBody = document.getElementById('rules-table-body');
+  const auditBody = document.getElementById('audit-log-body');
+  const runBtn = document.getElementById('btn-run-automation-now');
+  const simBtn = document.getElementById('btn-simulate-actuators');
+  const refreshAuditBtn = document.getElementById('btn-refresh-audit');
+
+  async function loadAutomationData() {
+    try {
+      const res = await fetch('/api/automation');
+      const data = await res.json();
+
+      // Render rules
+      rulesBody.innerHTML = (data.rules || []).map(r => `
+        <tr>
+          <td class="fw-bold text-dark">${r.rule_name}</td>
+          <td><span class="badge bg-light text-dark border text-uppercase">${r.resource_type}</span></td>
+          <td><code class="text-danger bg-light px-2 py-1 rounded small">${r.trigger_condition}</code></td>
+          <td class="small text-secondary">${r.action_type}</td>
+          <td>
+            <span class="badge ${r.auto_execute ? 'bg-success-subtle text-success' : 'bg-secondary-subtle text-secondary'}">
+              ${r.auto_execute ? 'Autonomous' : 'Manual Review'}
+            </span>
+          </td>
+          <td>
+            <span class="badge ${r.is_enabled ? 'badge-optimal' : 'badge-inactive'}">
+              ${r.is_enabled ? 'Active' : 'Disabled'}
+            </span>
+          </td>
+          <td class="text-end">
+            <div class="form-check form-switch d-inline-block">
+              <input class="form-check-input rule-toggle" type="checkbox" data-id="${r.id}" ${r.is_enabled ? 'checked' : ''}>
+            </div>
+          </td>
+        </tr>
+      `).join('');
+
+      // Wire up toggle switches
+      document.querySelectorAll('.rule-toggle').forEach(sw => {
+        sw.addEventListener('change', async (e) => {
+          const ruleId = e.target.dataset.id;
+          const isEnabled = e.target.checked;
+          try {
+            await fetch(`/api/automation/rules/${ruleId}`, {
+              method: 'PUT',
+              headers: {'Content-Type': 'application/json'},
+              body: JSON.stringify({ is_enabled: isEnabled })
+            });
+            showToast(`Rule ${isEnabled ? 'enabled' : 'disabled'}`, 'info');
+            loadAutomationData();
+          } catch(err) {
+            showToast('Failed to toggle rule', 'danger');
+          }
+        });
+      });
+
+      // Render audit trail
+      if (!data.recent_actions || data.recent_actions.length === 0) {
+        auditBody.innerHTML = '<tr><td colspan="5" class="text-center py-4 text-muted">No automation actions recorded yet.</td></tr>';
+      } else {
+        auditBody.innerHTML = data.recent_actions.map(act => `
+          <tr>
+            <td class="text-muted small">${act.timestamp}</td>
+            <td class="fw-semibold">${act.resource_name || 'System Asset #' + (act.resource_id || '--')}</td>
+            <td class="small text-danger">${act.trigger}</td>
+            <td class="small text-dark fw-medium">${act.action}</td>
+            <td>
+              <span class="badge ${act.status === 'Executed' ? 'bg-success' : 'bg-primary'} px-2 py-1">
+                <i class="bi bi-check-circle me-1"></i> ${act.status}
+              </span>
+            </td>
+          </tr>
+        `).join('');
+      }
+
+    } catch(err) {
+      console.error(err);
+      rulesBody.innerHTML = '<tr><td colspan="7" class="text-danger text-center">Failed to load automation data</td></tr>';
+    }
+  }
+
+  // Trigger automation execution
+  async function triggerAutomation(forceSim = false) {
+    const btn = forceSim ? simBtn : runBtn;
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Processing...';
+    try {
+      const res = await fetch('/api/automation/run', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/json'},
+        body: JSON.stringify({ force_simulation: forceSim })
+      });
+      const data = await res.json();
+      showToast(data.message, 'success');
+      loadAutomationData();
+    } catch(err) {
+      showToast('Automation trigger failed', 'danger');
+    } finally {
+      btn.disabled = false;
+      btn.innerHTML = forceSim ? '<i class="bi bi-lightning-charge me-1"></i> Auto Execute Simulation' : '<i class="bi bi-play-fill me-1"></i> Run Automation Engine Now';
+    }
+  }
+
+  runBtn.addEventListener('click', () => triggerAutomation(false));
+  simBtn.addEventListener('click', () => triggerAutomation(true));
+  refreshAuditBtn.addEventListener('click', loadAutomationData);
+
+  loadAutomationData();
+});
+</script>
+{% endblock %}

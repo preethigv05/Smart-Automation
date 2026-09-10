@@ -1,0 +1,251 @@
+{% extends "base.html" %}
+
+{% block page_title %}Alert & Notification Center{% endblock %}
+
+{% block content %}
+<div class="d-flex flex-wrap justify-content-between align-items-center mb-4 gap-3">
+  <div>
+    <h4 class="fw-bold mb-1">
+      <i class="bi bi-bell-fill text-danger me-1"></i> Critical Incident & Anomaly Alert Hub
+    </h4>
+    <p class="text-muted small mb-0">Automated triage for operational spikes, midnight water leaks, and power surges.</p>
+  </div>
+  <button class="btn btn-outline-success" id="btn-resolve-all">
+    <i class="bi bi-check2-all me-1"></i> Resolve All Active Alerts
+  </button>
+</div>
+
+<!-- SEVERITY COUNTERS ROW -->
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="kpi-card py-2 border-danger-subtle bg-danger-subtle">
+      <div>
+        <div class="kpi-title text-danger">Critical Incidents</div>
+        <div class="kpi-value text-danger" id="count-critical">0</div>
+        <div class="small text-danger fw-semibold">Immediate attention</div>
+      </div>
+      <div class="kpi-icon-box bg-white text-danger">
+        <i class="bi bi-shield-x"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="kpi-card py-2 border-warning-subtle bg-warning-subtle">
+      <div>
+        <div class="kpi-title text-warning-emphasis">High Priority</div>
+        <div class="kpi-value text-warning-emphasis" id="count-high">0</div>
+        <div class="small text-warning-emphasis fw-semibold">Spike &amp; leak watch</div>
+      </div>
+      <div class="kpi-icon-box bg-white text-warning">
+        <i class="bi bi-exclamation-triangle"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="kpi-card py-2 border-info-subtle bg-info-subtle">
+      <div>
+        <div class="kpi-title text-info-emphasis">Medium Warnings</div>
+        <div class="kpi-value text-info-emphasis" id="count-medium">0</div>
+        <div class="small text-info-emphasis fw-semibold">Suboptimal efficiency</div>
+      </div>
+      <div class="kpi-icon-box bg-white text-info">
+        <i class="bi bi-info-circle"></i>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-md-3">
+    <div class="kpi-card py-2 border-success-subtle bg-success-subtle">
+      <div>
+        <div class="kpi-title text-success">Resolved Notices</div>
+        <div class="kpi-value text-success" id="count-resolved">0</div>
+        <div class="small text-success fw-semibold">Automated / Fixed</div>
+      </div>
+      <div class="kpi-icon-box bg-white text-success">
+        <i class="bi bi-check-circle"></i>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- FILTER BAR -->
+<div class="card-modern mb-4">
+  <div class="card-modern-body py-3">
+    <div class="row g-3 align-items-center">
+      <div class="col-md-4">
+        <select class="form-select form-select-sm" id="alert-filter-status">
+          <option value="Active" selected>Active Alerts Only</option>
+          <option value="Resolved">Resolved History</option>
+          <option value="">All Alerts (All Statuses)</option>
+        </select>
+      </div>
+
+      <div class="col-md-4">
+        <select class="form-select form-select-sm" id="alert-filter-severity">
+          <option value="">All Severities</option>
+          <option value="CRITICAL">Critical Only</option>
+          <option value="HIGH">High Priority Only</option>
+          <option value="MEDIUM">Medium Warnings</option>
+          <option value="LOW">Low Informational</option>
+        </select>
+      </div>
+
+      <div class="col-md-4 text-md-end">
+        <button class="btn btn-sm btn-outline-secondary" id="btn-refresh-alerts">
+          <i class="bi bi-arrow-repeat"></i> Refresh
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ALERTS TABLE CARD -->
+<div class="card-modern">
+  <div class="card-modern-body p-0">
+    <div class="table-responsive">
+      <table class="table-modern">
+        <thead>
+          <tr>
+            <th>Severity</th>
+            <th>Resource Asset</th>
+            <th>Alert Message &amp; Diagnostic</th>
+            <th>Detected At</th>
+            <th>Status</th>
+            <th class="text-end">Resolution</th>
+          </tr>
+        </thead>
+        <tbody id="alerts-table-body">
+          <tr>
+            <td colspan="6" class="text-center py-4 text-muted">
+              <div class="spinner-border spinner-border-sm text-danger" role="status"></div>
+              <span class="ms-2">Loading alert telemetry...</span>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+  const statusFilter = document.getElementById('alert-filter-status');
+  const severityFilter = document.getElementById('alert-filter-severity');
+  const tableBody = document.getElementById('alerts-table-body');
+  const resolveAllBtn = document.getElementById('btn-resolve-all');
+  const refreshBtn = document.getElementById('btn-refresh-alerts');
+
+  async function loadAlerts() {
+    try {
+      let url = `/api/alerts?`;
+      if (statusFilter.value) url += `status=${statusFilter.value}&`;
+      if (severityFilter.value) url += `severity=${severityFilter.value}&`;
+
+      const res = await fetch(url);
+      const data = await res.json();
+      const alerts = data.alerts || [];
+
+      // Update counters
+      let cCrit = 0, cHigh = 0, cMed = 0, cRes = 0;
+      // Fetch all for counts
+      const fullRes = await fetch('/api/alerts');
+      const fullData = await fullRes.json();
+      (fullData.alerts || []).forEach(a => {
+        if (a.status === 'Resolved') cRes++;
+        else {
+          if (a.severity === 'CRITICAL') cCrit++;
+          else if (a.severity === 'HIGH') cHigh++;
+          else if (a.severity === 'MEDIUM') cMed++;
+        }
+      });
+      document.getElementById('count-critical').textContent = cCrit;
+      document.getElementById('count-high').textContent = cHigh;
+      document.getElementById('count-medium').textContent = cMed;
+      document.getElementById('count-resolved').textContent = cRes;
+
+      // Update sidebar alert badge if exists
+      const badge = document.getElementById('sidebar-alert-badge');
+      if (badge) {
+        badge.textContent = cCrit + cHigh + cMed;
+        badge.style.display = (cCrit + cHigh + cMed > 0) ? 'inline-block' : 'none';
+      }
+
+      if (alerts.length === 0) {
+        tableBody.innerHTML = '<tr><td colspan="6" class="text-center py-5 text-muted"><i class="bi bi-shield-check text-success fs-1 d-block mb-2"></i>No matching alerts found. System running smoothly.</td></tr>';
+        return;
+      }
+
+      tableBody.innerHTML = alerts.map(a => {
+        let sevBadge = 'severity-low';
+        if (a.severity === 'CRITICAL') sevBadge = 'severity-critical';
+        else if (a.severity === 'HIGH') sevBadge = 'severity-high';
+        else if (a.severity === 'MEDIUM') sevBadge = 'severity-medium';
+
+        const isResolved = a.status === 'Resolved';
+
+        return `
+          <tr>
+            <td>
+              <span class="badge ${sevBadge} px-2 py-1" style="font-size: 0.72rem;">${a.severity}</span>
+            </td>
+            <td class="fw-semibold text-dark">${a.resource_name || 'Asset #' + (a.resource_id || '--')}</td>
+            <td class="small text-secondary">${a.message}</td>
+            <td class="small text-muted">${a.created_at}</td>
+            <td>
+              <span class="badge ${isResolved ? 'bg-success-subtle text-success' : 'bg-danger-subtle text-danger'}">
+                ${a.status}
+              </span>
+            </td>
+            <td class="text-end">
+              ${!isResolved ? `
+                <button class="btn btn-sm btn-outline-success py-1 px-2 btn-resolve-single" data-id="${a.id}">
+                  <i class="bi bi-check2"></i> Resolve
+                </button>
+              ` : `<span class="small text-muted"><i class="bi bi-check2-circle text-success me-1"></i>Resolved</span>`}
+            </td>
+          </tr>
+        `;
+      }).join('');
+
+      document.querySelectorAll('.btn-resolve-single').forEach(btn => {
+        btn.addEventListener('click', async () => {
+          const alertId = btn.dataset.id;
+          try {
+            await fetch(`/api/alerts/${alertId}/resolve`, { method: 'PUT' });
+            showToast('Alert resolved', 'success');
+            loadAlerts();
+          } catch(err) {
+            showToast('Failed to resolve alert', 'danger');
+          }
+        });
+      });
+
+    } catch(err) {
+      console.error(err);
+      tableBody.innerHTML = '<tr><td colspan="6" class="text-danger text-center">Failed to load alerts</td></tr>';
+    }
+  }
+
+  resolveAllBtn.addEventListener('click', async () => {
+    try {
+      const res = await fetch('/api/alerts/resolve-all', { method: 'POST' });
+      const data = await res.json();
+      showToast(data.message, 'success');
+      loadAlerts();
+    } catch(err) {
+      showToast('Failed to resolve alerts', 'danger');
+    }
+  });
+
+  statusFilter.addEventListener('change', loadAlerts);
+  severityFilter.addEventListener('change', loadAlerts);
+  refreshBtn.addEventListener('click', loadAlerts);
+
+  loadAlerts();
+});
+</script>
+{% endblock %}
